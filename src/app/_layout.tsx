@@ -10,6 +10,7 @@ import { adaptNavigationTheme, PaperProvider } from "react-native-paper";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { darkTheme, lightTheme } from "@/constants/paper-theme";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { FavoritesProvider } from "@/contexts/favorites-context";
 import { AppThemeProvider, useAppTheme } from "@/contexts/theme-context";
 
 const { LightTheme: NavLightTheme, DarkTheme: NavDarkTheme } =
@@ -64,7 +65,9 @@ export default function RootLayout() {
   return (
     <AppThemeProvider>
       <AuthProvider>
-        <AppLayout />
+        <FavoritesProvider>
+          <AppLayout />
+        </FavoritesProvider>
       </AuthProvider>
     </AppThemeProvider>
   );
