@@ -3,13 +3,14 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import React from "react";
+import { Stack, useRouter } from "expo-router";
+import React, { useEffect } from "react";
 import { adaptNavigationTheme, PaperProvider } from "react-native-paper";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { darkTheme, lightTheme } from "@/constants/paper-theme";
+import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { AppThemeProvider, useAppTheme } from "@/contexts/theme-context";
-import { Stack } from "expo-router";
 
 const { LightTheme: NavLightTheme, DarkTheme: NavDarkTheme } =
   adaptNavigationTheme({
@@ -21,8 +22,20 @@ const { LightTheme: NavLightTheme, DarkTheme: NavDarkTheme } =
 
 function AppLayout() {
   const { isDark } = useAppTheme();
+  const { session, isLoading } = useAuth();
+  const router = useRouter();
+
   const paperTheme = isDark ? darkTheme : lightTheme;
   const navTheme = isDark ? NavDarkTheme : NavLightTheme;
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (session) {
+      router.replace("/(tabs)");
+    } else {
+      router.replace("/(auth)/login");
+    }
+  }, [session, isLoading, router]);
 
   return (
     <PaperProvider theme={paperTheme}>
@@ -50,7 +63,9 @@ function AppLayout() {
 export default function RootLayout() {
   return (
     <AppThemeProvider>
-      <AppLayout />
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
     </AppThemeProvider>
   );
 }

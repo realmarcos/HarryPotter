@@ -2,9 +2,11 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Divider, List, Switch, Text, useTheme } from "react-native-paper";
 
+import { useAuth } from "@/contexts/auth-context";
 import { useAppTheme } from "@/contexts/theme-context";
 
 export default function SettingScreen() {
+  const { signOut } = useAuth();
   const { isDark, toggleTheme } = useAppTheme();
   const theme = useTheme();
 
@@ -39,6 +41,16 @@ export default function SettingScreen() {
           style={styles.listItem}
         />
         <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
+
+        <List.Item
+          title="Sair"
+          titleStyle={{ color: theme.colors.onSurface }}
+          left={(props) => (
+            <List.Icon {...props} icon="logout" color={theme.colors.primary} />
+          )}
+          onPress={signOut}
+          style={styles.listItem}
+        />
       </View>
     </View>
   );
