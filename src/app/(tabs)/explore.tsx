@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -18,6 +18,7 @@ import {
 } from "react-native-paper";
 
 import { useFavorites } from "@/contexts/favorites-context";
+import { useHarryAPI } from "@/contexts/harry-api-contexto";
 import {
   Book,
   Category,
@@ -26,8 +27,6 @@ import {
   House,
   Spell,
 } from "@/types/potter-api";
-
-const BASE_URL = "https://potterapi-fedeperin.vercel.app/pt";
 
 const CATEGORIES: { value: Category; label: string; icon: string }[] = [
   { value: "books", label: "Livros", icon: "book-open-variant" },
@@ -84,40 +83,54 @@ function toFavoriteItem(category: Category, item: AnyItem): FavoriteItem {
 
 export default function ExploreScreen() {
   const theme = useTheme();
+  const { books, characters, spells, houses, isLoading } = useHarryAPI();
   const { width } = useWindowDimensions();
   const { addFavorite, removeFavorite, isFavorite } = useFavorites();
 
   const [category, setCategory] = useState<Category>("books");
   const [searchQuery, setSearchQuery] = useState("");
-  const [items, setItems] = useState<AnyItem[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const visibleItems = useMemo<AnyItem[]>(() => {
+    const source: Record<Category, AnyItem[]> = {
+      books,
+      characters,
+      spells,
+      houses,
+    };
+    const list = source[category];
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((item) => {
+      switch (category) {
+        case "books": {
+          const b = item as Book;
+          return (
+            b.title.toLowerCase().includes(q) ||
+            b.originalTitle.toLowerCase().includes(q)
+          );
+        }
+        case "characters": {
+          const c = item as Character;
+          return (
+            c.fullName.toLowerCase().includes(q) ||
+            c.nickname.toLowerCase().includes(q)
+          );
+        }
+        case "spells": {
+          const s = item as Spell;
+          return (
+            s.spell.toLowerCase().includes(q) || s.use.toLowerCase().includes(q)
+          );
+        }
+        case "houses": {
+          const h = item as House;
+          return h.house.toLowerCase().includes(q);
+        }
+      }
+    });
+  }, [category, books, characters, spells, houses, searchQuery]);
 
-  const fetchData = useCallback(async (cat: Category, search: string) => {
-    setLoading(true);
-    try {
-      const qs = search ? `?search=${encodeURIComponent(search)}` : "";
-      const res = await fetch(`${BASE_URL}/${cat}${qs}`);
-      if (!res.ok) throw new Error();
-      setItems(await res.json());
-    } catch {
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    setSearchQuery("");
-    fetchData(category, "");
-  }, [category, fetchData]);
-
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchData(category, text), 600);
-  };
+  const handleSearch = (text: string) => setSearchQuery(text);
 
   const toggleFavorite = useCallback(
     (item: AnyItem) => {
@@ -395,13 +408,13 @@ export default function ExploreScreen() {
 
       {/* Results */}
       <View style={styles.listContainer}>
-        {loading ? (
+        {isLoading ? (
           <View style={styles.center}>
             <ActivityIndicator color={theme.colors.primary} size="large" />
           </View>
         ) : (
           <FlatList
-            data={items}
+            data={visibleItems}
             keyExtractor={(item) =>
               `${category}-${(item as { index: number }).index}`
             }

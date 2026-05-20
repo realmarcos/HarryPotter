@@ -11,6 +11,7 @@ import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { darkTheme, lightTheme } from "@/constants/paper-theme";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { FavoritesProvider } from "@/contexts/favorites-context";
+import { HarryAPIProvider } from "@/contexts/harry-api-contexto";
 import { AppThemeProvider, useAppTheme } from "@/contexts/theme-context";
 
 const { LightTheme: NavLightTheme, DarkTheme: NavDarkTheme } =
@@ -42,20 +43,22 @@ function AppLayout() {
     <PaperProvider theme={paperTheme}>
       <ThemeProvider value={navTheme}>
         <AnimatedSplashOverlay />
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="(auth)"
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack>
+        <HarryAPIProvider>
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="(auth)"
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </HarryAPIProvider>
       </ThemeProvider>
     </PaperProvider>
   );
