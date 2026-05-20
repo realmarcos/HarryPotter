@@ -1,4 +1,10 @@
+import { auth } from "@/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface User {
@@ -47,24 +53,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const storedUsers = await AsyncStorage.getItem("@users");
-      const currentSession: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-
-      const user = currentSession.find(
-        (item) => item.email === email && item.password === password,
-      );
-
-      if (user) {
-        const userSession = {
-          id: user.id,
-          userName: user.userName,
-          email: user.email,
-        };
-        await AsyncStorage.setItem("@session", JSON.stringify(userSession));
-        setSession(userSession);
-      } else {
-        alert("Credenciais inválidas");
-      }
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const newSession = {
+        id: result.user.uid,
+        userName: result.user.displayName || "",
+        email: result.user.email || "",
+      };
+      setSession(newSession);
+      await AsyncStorage.setItem("@session", JSON.stringify(newSession));
     } catch {
       alert("Login falhou");
     }
@@ -81,26 +77,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (username: string, email: string, password: string) => {
     try {
-      const newUser: User = {
-        id: Math.random().toString(36).substr(2, 9), // Gerar ID aleatório
-        userName: username,
+      const result = await createUserWithEmailAndPassword(
+        auth,
         email,
         password,
+      );
+      await updateProfile(result.user, { displayName: username });
+      const newSession = {
+        id: result.user.uid,
+        userName: result.user.displayName || "",
+        email: result.user.email || "",
       };
-
-      const users = await AsyncStorage.getItem("@users");
-      const currentUsers = users ? JSON.parse(users) : [];
-      currentUsers.push(newUser);
-
-      await AsyncStorage.setItem("@users", JSON.stringify(currentUsers));
-      await AsyncStorage.setItem("@session", JSON.stringify(newUser));
-      setSession({
-        id: newUser.id,
-        userName: newUser.userName,
-        email: newUser.email,
-      });
+      setSession(newSession);
+      await AsyncStorage.setItem("@session", JSON.stringify(newSession));
     } catch {
-      alert("Registro falhou: ");
+      alert("Registro falhou ");
     }
   };
 
