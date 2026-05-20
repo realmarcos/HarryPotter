@@ -1,56 +1,112 @@
-# Welcome to your Expo app 👋
+# HarryPotter App (Expo)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo mobile/web com tema Harry Potter, autenticação com Firebase, navegação por abas e consumo de API externa para livros, personagens, feitiços e casas.
 
-## Get started
+## Analise tecnica do projeto
 
-1. Install dependencies
+### Stack principal
 
-   ```bash
-   npm install
-   ```
+- Expo SDK 55 (`expo` ~55.0.25)
+- React 19 + React Native 0.83
+- Expo Router (roteamento baseado em arquivos)
+- TypeScript em modo `strict`
+- React Native Paper (tema e componentes de UI)
+- Firebase Auth (login/cadastro)
+- AsyncStorage (sessao, favoritos e cache da API)
 
-2. Start the app
+### Arquitetura (resumo)
 
-   ```bash
-   npx expo start
-   ```
+- `src/app`: rotas e layouts do Expo Router
+- `src/app/(auth)`: telas de login e cadastro
+- `src/app/(tabs)`: abas principais (Home, Explorador, Configuracoes)
+- `src/contexts/auth-context.tsx`: estado de autenticacao e sessao
+- `src/contexts/harry-api-contexto.tsx`: consumo e cache da API Harry Potter
+- `src/contexts/favorites-context.tsx`: persistencia de favoritos
+- `src/firebase.ts`: inicializacao do Firebase com variaveis `EXPO_PUBLIC_*`
 
-In the output, you'll find options to open the app in a
+### Dependencias externas e conectividade
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Firebase Authentication
+- API publica: `https://potterapi-fedeperin.vercel.app/pt`
+- O app precisa de internet para login/cadastro e para primeira carga dos dados da API.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Requisitos tecnicos
 
-## Get a fresh project
+### Ambiente local
 
-When you're ready, run:
+- Node.js LTS (recomendado: 20+)
+- npm (lockfile ja incluso no projeto)
+- Expo CLI via `npx`
 
-```bash
-npm run reset-project
+### Para executar em dispositivos/emuladores
+
+- Android Studio (emulador Android)
+- Xcode (simulador iOS, somente macOS)
+- Expo Go (opcional, para testes rapidos)
+
+### Configuracao obrigatoria
+
+Este projeto depende de variaveis de ambiente para o Firebase.
+
+1. Crie um arquivo `.env` na raiz do projeto com base em `.env.exemplo`.
+2. Preencha os valores reais do seu projeto Firebase.
+
+Exemplo de variaveis esperadas:
+
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_DATABASE_URL=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
+EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=...
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Observacao: `app.json` referencia `./google-services.json` em `android.googleServicesFile`. Esse arquivo e necessario para builds Android nativas (prebuild/dev build/release).
 
-### Other setup steps
+## Como iniciar o projeto
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+1. Instale as dependencias:
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+2. Crie e configure o `.env` (a partir de `.env.exemplo`).
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+3. Inicie o servidor de desenvolvimento:
 
-## Join the community
+```bash
+npm run start
+```
 
-Join our community of developers creating universal apps.
+4. Execute no alvo desejado:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm run android
+npm run ios
+npm run web
+```
+
+## Scripts disponiveis
+
+- `npm run start`: inicia o Expo
+- `npm run android`: abre no Android
+- `npm run ios`: abre no iOS
+- `npm run web`: abre no navegador
+- `npm run lint`: executa lint com Expo/ESLint
+- `npm run reset-project`: script utilitario para resetar estrutura de `src/app`
+
+## Notas de desenvolvimento
+
+- O roteamento inicial e controlado por sessao no layout raiz (`src/app/_layout.tsx`).
+- Sessao e favoritos sao persistidos no AsyncStorage.
+- Dados da API sao cacheados localmente apos a primeira carga.
+
+## Documentacao recomendada
+
+Como o projeto esta no Expo SDK 55, prefira a documentacao versionada:
+
+- https://docs.expo.dev/versions/v55.0.0/
