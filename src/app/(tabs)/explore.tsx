@@ -1,30 +1,30 @@
 import { Image } from "expo-image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    FlatList,
-    ScrollView,
-    StyleSheet,
-    useWindowDimensions,
-    View,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
 } from "react-native";
 import {
-    ActivityIndicator,
-    Chip,
-    IconButton,
-    Searchbar,
-    Surface,
-    Text,
-    useTheme,
+  ActivityIndicator,
+  Chip,
+  IconButton,
+  Searchbar,
+  Surface,
+  Text,
+  useTheme,
 } from "react-native-paper";
 
 import { useFavorites } from "@/contexts/favorites-context";
 import {
-    Book,
-    Category,
-    Character,
-    FavoriteItem,
-    House,
-    Spell,
+  Book,
+  Category,
+  Character,
+  FavoriteItem,
+  House,
+  Spell,
 } from "@/types/potter-api";
 
 const BASE_URL = "https://potterapi-fedeperin.vercel.app/pt";
@@ -370,55 +370,61 @@ export default function ExploreScreen() {
       />
 
       {/* Category chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipRow}
-      >
-        {CATEGORIES.map((cat) => (
-          <Chip
-            key={cat.value}
-            selected={category === cat.value}
-            onPress={() => setCategory(cat.value)}
-            icon={cat.icon}
-            style={styles.chip}
-            selectedColor={theme.colors.primary}
-          >
-            {cat.label}
-          </Chip>
-        ))}
-      </ScrollView>
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipRow}
+        >
+          {CATEGORIES.map((cat) => (
+            <Chip
+              key={cat.value}
+              selected={category === cat.value}
+              showSelectedCheck={false}
+              mode={category === cat.value ? "flat" : "outlined"}
+              onPress={() => setCategory(cat.value)}
+              icon={cat.icon}
+              style={styles.chip}
+              selectedColor={theme.colors.primary}
+            >
+              {cat.label}
+            </Chip>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Results */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={theme.colors.primary} size="large" />
-        </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item) =>
-            `${category}-${(item as { index: number }).index}`
-          }
-          renderItem={renderItem}
-          numColumns={isGrid ? 2 : 1}
-          key={isGrid ? "grid" : "list"}
-          contentContainerStyle={[styles.list, isGrid && styles.gridList]}
-          columnWrapperStyle={isGrid ? styles.gridRow : undefined}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={{ fontSize: 36 }}>🔍</Text>
-              <Text
-                variant="bodyMedium"
-                style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
-              >
-                Nenhum resultado encontrado
-              </Text>
-            </View>
-          }
-        />
-      )}
+      <View style={styles.listContainer}>
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator color={theme.colors.primary} size="large" />
+          </View>
+        ) : (
+          <FlatList
+            data={items}
+            keyExtractor={(item) =>
+              `${category}-${(item as { index: number }).index}`
+            }
+            renderItem={renderItem}
+            numColumns={isGrid ? 2 : 1}
+            key={isGrid ? "grid" : "list"}
+            contentContainerStyle={[styles.list, isGrid && styles.gridList]}
+            columnWrapperStyle={isGrid ? styles.gridRow : undefined}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.center}>
+                <Text style={{ fontSize: 36 }}>🔍</Text>
+                <Text
+                  variant="bodyMedium"
+                  style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
+                >
+                  Nenhum resultado encontrado
+                </Text>
+              </View>
+            }
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -443,6 +449,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 48,
   },
+  listContainer: { flex: 1 },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
   gridList: { paddingHorizontal: 16, paddingBottom: 24 },
   gridRow: { gap: 16, marginBottom: 16 },
